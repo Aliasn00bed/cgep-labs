@@ -3,7 +3,7 @@
 terraform {
     required_version = ">1.6"
     required_providers{
-        aws     = { source = "hashicorp/aws", version = "~> 6.0"}
+        aws     = { source = "hashicorp/aws", version = "~> 5.0"}
         random  = { source = "hashicorp/random", version = "~> 3.6"}
     }
 }
@@ -29,7 +29,7 @@ resource "random_id" "bucket_suffix" {
 
 locals {
     effective_suffix    = var.bucket_suffix != "" ? var.bucket_suffix : random_id.bucket_suffix.hex
-    primary_name        = "${var_project_name}-${var.environment}-data-${local.effective_suffix}"
+    primary_name        = "${var.project_name}-${var.environment}-data-${local.effective_suffix}"
     log_name            = "${var.project_name}-${var.environment}-logs-${local.effective_suffix}"
 }
 
