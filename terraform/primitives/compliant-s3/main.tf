@@ -26,7 +26,7 @@ provider "aws" {
 resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
-
+# Corrections were necessary here because typos exist.
 locals {
     effective_suffix    = var.bucket_suffix != "" ? var.bucket_suffix : random_id.bucket_suffix.hex
     primary_name        = "${var.project_name}-${var.environment}-data-${local.effective_suffix}"
