@@ -9,22 +9,22 @@ terraform {
 }
 
 provider "aws" {
-    region = "us-east-1"
+  region = "us-east-1"
 
-    #CM-6 Configuration settings, required compliance tags apply to ever
-    #taggable resource by default. Removes the chance of forgetting them.
-    default_tags {
-        tags = {
-            Project         = var.project_name
-            Environment     = var.environment
-            ManagedBy       = "terraform"
-            ComplianceScope = "cge-p-lab"
-        }
+  #CM-6 Configuration settings, required compliance tags apply to ever
+  #taggable resource by default. Removes the chance of forgetting them.
+  default_tags {
+    tags = {
+      Project         = var.project_name
+      Environment     = var.environment
+      ManagedBy       = "terraform"
+      ComplianceScope = "cge-p-lab"
     }
+  }
 }
 # this exists to provide a buffer for randomization due to a possibly duplicate cgep-lab-dev-data input.
 resource "random_id" "bucket_suffix" {
-    byte_length = 4
+  byte_length = 4
 }
 
 locals {
@@ -34,7 +34,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "primary" {
-    bucket = local.primary_name
+  bucket = local.primary_name
 }
 
 #terraform/primitives/compliant-s3/main.tf(continued)
@@ -44,12 +44,12 @@ resource "aws_s3_bucket" "primary" {
 # switch to KMS-managed keys, covered in a later lab.
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "primary" {
-    bucket      = aws_s3_bucket.primary.id
-    rule {
-        apply_server_side_encryption_by_default {
-            sse_algorithm = "AES256"
-        }
+  bucket = aws_s3_bucket.primary.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
+  }
 }
 
 # KMS Teaser:
@@ -65,60 +65,60 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "primary" {
 # CM-6: Versioning preserves prior object states for recovery and audit.
 
 resource "aws_s3_bucket_versioning" "primary" {
-    bucket = aws_s3_bucket.primary.id
-    versioning_configuration {
-        status = "Enabled"
-    }
+  bucket = aws_s3_bucket.primary.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
 # AC-3: Access control, explicit deny on every public access vector.
 
 resource "aws_s3_bucket_public_access_block" "primary" {
-    bucket                  = aws_s3_bucket.primary.id
-    block_public_acls       = true
-    block_public_policy     = true
-    ignore_public_acls      = true
-    restrict_public_buckets = true
+  bucket                  = aws_s3_bucket.primary.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 
 # Au-3 / AU-6: content of audit records + audit review
 
 resource "aws_s3_bucket" "log" {
-    bucket  = local.log_name
+  bucket = local.log_name
 }
 
 resource "aws_s3_bucket_ownership_controls" "log" {
-    bucket  = aws_s3_bucket.log.id
-    rule {
-        object_ownership = "BucketOwnerPreferred"
-    }
+  bucket = aws_s3_bucket.log.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
 
 resource "aws_s3_bucket_acl" "log" {
-    depends_on  = [aws_s3_bucket_ownership_controls.log]
-    bucket      = aws_s3_bucket.log.id
-    acl         = "log-delivery-write"
+  depends_on = [aws_s3_bucket_ownership_controls.log]
+  bucket     = aws_s3_bucket.log.id
+  acl        = "log-delivery-write"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "log" {
-    bucket      = aws_s3_bucket.log.id
-    rule {
-        apply_server_side_encryption_by_default { see_algorithm = "AES256" }
-    }
+  bucket = aws_s3_bucket.log.id
+  rule {
+    apply_server_side_encryption_by_default { see_algorithm = "AES256" }
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "log" {
-    bucket                      = aws_s3_bucket.log.id
-    block_public_acls           = true
-    block_public_policy         = true
-    ignore_public_acls          = true
-    restrict_public_buckets     = true
+  bucket                  = aws_s3_bucket.log.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_logging" "primary" {
-    bucket              = aws_s3_bucket.primary.id
-    target_bucket       = aws_s3_bucket.log.id
-    target_prefix       = "access-logs/"
+  bucket        = aws_s3_bucket.primary.id
+  target_bucket = aws_s3_bucket.log.id
+  target_prefix = "access-logs/"
 }
 
