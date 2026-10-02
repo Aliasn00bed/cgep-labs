@@ -12,7 +12,7 @@ variable "environment" {
     description = "Deployment environment. Drives the Environment tag and downstream policy decisions."
     validation {
         condition       = contains (["dev", "staging", "prod"], var.environment)
-        error_message   = "Environment must be one of: dev, staging, prod."
+        error_message   = "environment must be one of: dev, staging, prod."
     }
 }
 
