@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  profile = "Aliasn00bed"
 
   #CM-6 Configuration settings, required compliance tags apply to ever
   #taggable resource by default. Removes the chance of forgetting them.
