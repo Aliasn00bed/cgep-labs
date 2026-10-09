@@ -19,7 +19,7 @@ module "data bucket" {
     project_label   = "cgep-labs"
     environment     = "dev"
     retention_days  = 30
-    bucket_name_suffix = "devdat01"
+    bucket_name_suffix = "devdat + ${count.index}"
 }
 
 output "attestation"    { value = module.data_bucket.compliance_attestation }
